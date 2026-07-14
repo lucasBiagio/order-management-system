@@ -68,4 +68,15 @@ public sealed class ProductRepository : IProductRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<List<Product>> GetByIdsAsync(
+    IEnumerable<Guid> ids,
+    CancellationToken cancellationToken = default)
+    {
+        var productIds = ids.Distinct().ToArray();
+
+        return await _context.Products
+            .Where(product => productIds.Contains(product.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

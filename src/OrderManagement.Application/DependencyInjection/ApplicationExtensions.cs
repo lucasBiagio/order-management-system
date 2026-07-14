@@ -15,8 +15,12 @@ public static class ApplicationExtensions
             typeof(ApplicationAssemblyReference));
 
         services.AddValidatorsFromAssemblyContaining<ApplicationAssemblyReference>();
+
         services.AddScoped<ICustomerService, CustomerService>();
+
         services.AddScoped<IProductService, ProductService>();
+
+        services.AddScoped<IOrderService, OrderService>();
 
         return services;
     }

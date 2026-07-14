@@ -23,6 +23,10 @@ public interface IProductRepository : IRepository
         Product product,
         CancellationToken cancellationToken = default);
 
+    Task<List<Product>> GetByIdsAsync(
+    IEnumerable<Guid> ids,
+    CancellationToken cancellationToken = default);
+
     void Update(Product product);
 
     void Remove(Product product);

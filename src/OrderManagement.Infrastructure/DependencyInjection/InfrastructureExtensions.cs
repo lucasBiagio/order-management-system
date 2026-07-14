@@ -29,6 +29,8 @@ public static class InfrastructureExtensions
 
         services.AddScoped<IProductRepository, ProductRepository>();
 
+        services.AddScoped<IOrderRepository, OrderRepository>();
+
         return services;
 
 

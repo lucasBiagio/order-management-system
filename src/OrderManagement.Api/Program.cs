@@ -1,8 +1,16 @@
 using OrderManagement.Api.Middleware;
 using OrderManagement.Application.DependencyInjection;
 using OrderManagement.Infrastructure.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using OrderManagement.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var databaseDirectory = Path.Combine(
+    builder.Environment.ContentRootPath,
+    "Data");
+
+Directory.CreateDirectory(databaseDirectory);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
