@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderManagement.Infrastructure.Persistence;
+using OrderManagement.Application.Interfaces.Repositories;
+using OrderManagement.Infrastructure.Repositories;
 
 namespace OrderManagement.Infrastructure.DependencyInjection;
 
@@ -23,6 +25,10 @@ public static class InfrastructureExtensions
         services.AddDbContext<OrderManagementDbContext>(options =>
             options.UseSqlite(connectionString));
 
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+
         return services;
+
+
     }
 }
