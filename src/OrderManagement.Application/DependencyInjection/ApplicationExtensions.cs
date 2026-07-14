@@ -16,6 +16,7 @@ public static class ApplicationExtensions
 
         services.AddValidatorsFromAssemblyContaining<ApplicationAssemblyReference>();
         services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IProductService, ProductService>();
 
         return services;
     }
