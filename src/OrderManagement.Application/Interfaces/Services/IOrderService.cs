@@ -14,4 +14,9 @@ public interface IOrderService
     Task<OrderResponse> CreateAsync(
         CreateOrderRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<OrderResponse> UpdateStatusAsync(
+    Guid id,
+    UpdateOrderStatusRequest request,
+    CancellationToken cancellationToken = default);
 }

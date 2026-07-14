@@ -15,19 +15,22 @@ public sealed class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<CreateOrderRequest> _createValidator;
+    private readonly IValidator<UpdateOrderStatusRequest> _statusValidator;
 
     public OrderService(
         ICustomerRepository customerRepository,
         IProductRepository productRepository,
         IOrderRepository orderRepository,
         IMapper mapper,
-        IValidator<CreateOrderRequest> createValidator)
+        IValidator<CreateOrderRequest> createValidator,
+        IValidator<UpdateOrderStatusRequest> statusValidator)
     {
         _customerRepository = customerRepository;
         _productRepository = productRepository;
         _orderRepository = orderRepository;
         _mapper = mapper;
         _createValidator = createValidator;
+        _statusValidator = statusValidator;
     }
 
     public async Task<IReadOnlyCollection<OrderResponse>> GetAllAsync(
@@ -153,5 +156,31 @@ public sealed class OrderService : IOrderService
                     $"solicitado: {requestedQuantity}.");
             }
         }
+    }
+
+    public async Task<OrderResponse> UpdateStatusAsync(
+    Guid id,
+    UpdateOrderStatusRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        await _statusValidator.ValidateAndThrowAsync(
+            request,
+            cancellationToken);
+
+        var order = await _orderRepository.GetByIdAsync(
+            id,
+            cancellationToken);
+
+        if (order is null)
+        {
+            throw new NotFoundException(
+                $"Pedido com o identificador '{id}' não foi encontrado.");
+        }
+
+        order.ChangeStatus(request.Status);
+
+        await _orderRepository.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<OrderResponse>(order);
     }
 }

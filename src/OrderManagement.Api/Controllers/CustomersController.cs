@@ -6,6 +6,7 @@ namespace OrderManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/customers")]
+[Produces("application/json")]
 public sealed class CustomersController : ControllerBase
 {
     private readonly ICustomerService _customerService;
