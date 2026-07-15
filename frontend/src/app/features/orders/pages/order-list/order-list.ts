@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
@@ -15,10 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
 import { Customer } from '../../../../core/models/customer';
-import {
-  Order,
-  OrderStatus
-} from '../../../../core/models/order';
+import { Order, OrderStatus } from '../../../../core/models/order';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { OrderService } from '../../../../core/services/order.service';
 
@@ -38,10 +30,10 @@ interface OrderListItem extends Order {
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   templateUrl: './order-list.html',
-  styleUrl: './order-list.scss'
+  styleUrl: './order-list.scss',
 })
 export class OrderList implements OnInit {
   private readonly orderService = inject(OrderService);
@@ -50,19 +42,31 @@ export class OrderList implements OnInit {
   readonly orders = signal<OrderListItem[]>([]);
   readonly isLoading = signal(true);
 
+  readonly selectedStatus = signal<OrderStatus | null>(null);
+
+  readonly filteredOrders = computed(() => {
+    const status = this.selectedStatus();
+
+    if (status === null) {
+      return this.orders();
+    }
+
+    return this.orders().filter((order) => order.status === status);
+  });
+
   readonly statusOptions = [
     {
       value: OrderStatus.Pending,
-      label: 'Pendente'
+      label: 'Pendente',
     },
     {
       value: OrderStatus.Paid,
-      label: 'Pago'
+      label: 'Pago',
     },
     {
       value: OrderStatus.Cancelled,
-      label: 'Cancelado'
-    }
+      label: 'Cancelado',
+    },
   ];
 
   ngOnInit(): void {
@@ -74,7 +78,7 @@ export class OrderList implements OnInit {
 
     forkJoin({
       orders: this.orderService.getAll(),
-      customers: this.customerService.getAll()
+      customers: this.customerService.getAll(),
     }).subscribe({
       next: ({ orders, customers }) => {
         const customerNames = this.buildCustomerNames(customers);
@@ -82,19 +86,13 @@ export class OrderList implements OnInit {
         const items = orders
           .map((order) => ({
             ...order,
-            customerName:
-              customerNames.get(order.customerId) ??
-              'Cliente não encontrado',
-            totalItems: order.items.reduce(
-              (total, item) => total + item.quantity,
-              0
-            ),
-            isUpdatingStatus: false
+            customerName: customerNames.get(order.customerId) ?? 'Cliente não encontrado',
+            totalItems: order.items.reduce((total, item) => total + item.quantity, 0),
+            isUpdatingStatus: false,
           }))
           .sort(
             (first, second) =>
-              new Date(second.orderDate).getTime() -
-              new Date(first.orderDate).getTime()
+              new Date(second.orderDate).getTime() - new Date(first.orderDate).getTime(),
           );
 
         this.orders.set(items);
@@ -102,40 +100,35 @@ export class OrderList implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
-  updateStatus(
-    order: OrderListItem,
-    status: OrderStatus
-  ): void {
+  updateStatus(order: OrderListItem, status: OrderStatus): void {
     if (order.status === status || order.isUpdatingStatus) {
       return;
     }
 
     this.setUpdatingStatus(order.id, true);
 
-    this.orderService
-      .updateStatus(order.id, { status })
-      .subscribe({
-        next: (updatedOrder) => {
-          this.orders.update((orders) =>
-            orders.map((currentOrder) =>
-              currentOrder.id === order.id
-                ? {
-                    ...currentOrder,
-                    status: updatedOrder.status,
-                    isUpdatingStatus: false
-                  }
-                : currentOrder
-            )
-          );
-        },
-        error: () => {
-          this.setUpdatingStatus(order.id, false);
-        }
-      });
+    this.orderService.updateStatus(order.id, { status }).subscribe({
+      next: (updatedOrder) => {
+        this.orders.update((orders) =>
+          orders.map((currentOrder) =>
+            currentOrder.id === order.id
+              ? {
+                  ...currentOrder,
+                  status: updatedOrder.status,
+                  isUpdatingStatus: false,
+                }
+              : currentOrder,
+          ),
+        );
+      },
+      error: () => {
+        this.setUpdatingStatus(order.id, false);
+      },
+    });
   }
 
   getStatusLabel(status: OrderStatus): string {
@@ -170,30 +163,24 @@ export class OrderList implements OnInit {
     }
   }
 
-  private setUpdatingStatus(
-    orderId: string,
-    isUpdatingStatus: boolean
-  ): void {
+  private setUpdatingStatus(orderId: string, isUpdatingStatus: boolean): void {
     this.orders.update((orders) =>
       orders.map((order) =>
         order.id === orderId
           ? {
               ...order,
-              isUpdatingStatus
+              isUpdatingStatus,
             }
-          : order
-      )
+          : order,
+      ),
     );
   }
 
-  private buildCustomerNames(
-    customers: Customer[]
-  ): Map<string, string> {
-    return new Map(
-      customers.map((customer) => [
-        customer.id,
-        customer.name
-      ])
-    );
+  private buildCustomerNames(customers: Customer[]): Map<string, string> {
+    return new Map(customers.map((customer) => [customer.id, customer.name]));
+  }
+
+  filterByStatus(status: OrderStatus | null): void {
+    this.selectedStatus.set(status);
   }
 }

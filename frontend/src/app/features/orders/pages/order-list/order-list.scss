@@ -247,4 +247,23 @@ tbody tr {
   .status-select ::ng-deep .mat-mdc-select-arrow {
     color: inherit;
   }
+
+  .filters {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .filters mat-form-field {
+    width: 240px;
+  }
+
+  @media (max-width: 700px) {
+    .filters {
+      justify-content: stretch;
+    }
+
+    .filters mat-form-field {
+      width: 100%;
+    }
+  }
 }
