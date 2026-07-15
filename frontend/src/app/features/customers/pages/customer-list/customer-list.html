@@ -1,1 +1,87 @@
-<p>customer-list works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">RELACIONAMENTO</span>
+      <h1>Clientes</h1>
+      <p>Consulte e gerencie os clientes disponíveis para pedidos.</p>
+    </div>
+
+    <button
+      mat-flat-button
+      type="button"
+      (click)="openCreateDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo cliente
+    </button>
+  </header>
+
+  <mat-card class="table-card">
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="42"></mat-spinner>
+        <span>Carregando clientes...</span>
+      </div>
+    } @else if (customers().length === 0) {
+      <div class="empty-state">
+        <mat-icon>group</mat-icon>
+        <h2>Nenhum cliente encontrado</h2>
+        <p>Cadastre o primeiro cliente para começar.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>E-mail</th>
+              <th class="actions-column">Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (customer of customers(); track customer.id) {
+              <tr>
+                <td>
+                  <div class="customer-name">
+                    <div class="customer-icon">
+                      <mat-icon>person</mat-icon>
+                    </div>
+
+                    <span>{{ customer.name }}</span>
+                  </div>
+                </td>
+
+                <td class="email">
+                  {{ customer.email }}
+                </td>
+
+                <td class="actions-column">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Editar cliente"
+                    title="Editar cliente"
+                    (click)="openEditDialog(customer)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Excluir cliente"
+                    title="Excluir cliente"
+                    (click)="deleteCustomer(customer)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </mat-card>
+</section>
