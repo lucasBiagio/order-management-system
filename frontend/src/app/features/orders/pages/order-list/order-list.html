@@ -1,1 +1,95 @@
-<p>order-list works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">GESTÃO</span>
+      <h1>Pedidos</h1>
+      <p>Acompanhe os pedidos criados e seus respectivos status.</p>
+    </div>
+
+    <button mat-flat-button type="button" routerLink="/orders/create">
+      <mat-icon>add</mat-icon>
+      Novo pedido
+    </button>
+  </header>
+
+  <mat-card class="table-card">
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="42"></mat-spinner>
+        <span>Carregando pedidos...</span>
+      </div>
+    } @else if (orders().length === 0) {
+      <div class="empty-state">
+        <mat-icon>receipt_long</mat-icon>
+        <h2>Nenhum pedido encontrado</h2>
+        <p>Crie o primeiro pedido para começar.</p>
+
+        <button mat-flat-button type="button" routerLink="/orders/create">
+          <mat-icon>add</mat-icon>
+          Criar pedido
+        </button>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Data</th>
+              <th>Itens</th>
+              <th>Status</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (order of orders(); track order.id) {
+              <tr>
+                <td>
+                  <div class="customer">
+                    <div class="customer-icon">
+                      <mat-icon>person</mat-icon>
+                    </div>
+
+                    <div>
+                      <strong>{{ order.customerName }}</strong>
+                      <span> Pedido #{{ order.id.slice(0, 8) }} </span>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="date">
+                  {{ order.orderDate | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+
+                <td>
+                  {{ order.totalItems }}
+                  {{ order.totalItems === 1 ? 'unidade' : 'unidades' }}
+                </td>
+
+                <td>
+                  <mat-select
+                    class="status-select"
+                    [value]="order.status"
+                    [disabled]="order.isUpdatingStatus"
+                    (selectionChange)="updateStatus(order, $event.value)"
+                    [class]="getStatusClass(order.status)"
+                    aria-label="Alterar status do pedido"
+                  >
+                    @for (option of statusOptions; track option.value) {
+                      <mat-option [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </td>
+
+                <td class="total">R$ {{ order.totalAmount | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </mat-card>
+</section>

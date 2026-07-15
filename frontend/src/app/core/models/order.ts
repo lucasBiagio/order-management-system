@@ -1,19 +1,35 @@
-import { OrderItem } from './order-item';
+export enum OrderStatus {
+  Pending = 1,
+  Paid = 2,
+  Cancelled = 3
+}
+
+export interface OrderItem {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
 
 export interface Order {
+  id: string;
+  customerId: string;
+  orderDate: string;
+  status: OrderStatus;
+  totalAmount: number;
+  items: OrderItem[];
+}
 
-    id: string;
+export interface CreateOrderItemRequest {
+  productId: string;
+  quantity: number;
+}
 
-    customerId: string;
+export interface CreateOrderRequest {
+  customerId: string;
+  items: CreateOrderItemRequest[];
+}
 
-    customerName: string;
-
-    orderDate: string;
-
-    status: string;
-
-    totalAmount: number;
-
-    items: OrderItem[];
-
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
 }

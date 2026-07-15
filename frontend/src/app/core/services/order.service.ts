@@ -1,33 +1,38 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import {
+  CreateOrderRequest,
+  Order,
+  UpdateOrderStatusRequest
+} from '../models/order';
 import { BaseService } from './base.service';
-import { Order } from '../models/order';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class OrderService extends BaseService {
+  private readonly endpoint = `${this.apiUrl}/orders`;
 
-    getAll(): Observable<Order[]> {
+  getAll(): Observable<Order[]> {
+    return this.http.get<Order[]>(this.endpoint);
+  }
 
-        return this.http.get<Order[]>(`${this.apiUrl}/orders`);
+  getById(id: string): Observable<Order> {
+    return this.http.get<Order>(`${this.endpoint}/${id}`);
+  }
 
-    }
+  create(request: CreateOrderRequest): Observable<Order> {
+    return this.http.post<Order>(this.endpoint, request);
+  }
 
-    getById(id: number): Observable<Order> {
-
-        return this.http.get<Order>(`${this.apiUrl}/orders/${id}`);
-    }
-
-    create(order: Order): Observable<Order> {
-
-        return this.http.post<Order>(`${this.apiUrl}/orders`, order);
-    }
-
-    updateStatus(id: number, order: Order): Observable<Order> {
-
-        return this.http.put<Order>(`${this.apiUrl}/orders/${id}`, order);
-    }   
-
+  updateStatus(
+    id: string,
+    request: UpdateOrderStatusRequest
+  ): Observable<Order> {
+    return this.http.patch<Order>(
+      `${this.endpoint}/${id}/status`,
+      request
+    );
+  }
 }

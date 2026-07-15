@@ -1,1 +1,179 @@
-<p>order-create works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">PEDIDOS</span>
+      <h1>Novo pedido</h1>
+      <p>Selecione o cliente e adicione os produtos desejados.</p>
+    </div>
+
+    <button mat-button type="button" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar
+    </button>
+  </header>
+
+  @if (isLoading()) {
+    <mat-card class="loading-card">
+      <mat-spinner diameter="42"></mat-spinner>
+      <span>Carregando dados...</span>
+    </mat-card>
+  } @else {
+    <div class="content-grid">
+      <div class="main-column">
+        <mat-card class="card">
+          <h2>Cliente</h2>
+
+          <form [formGroup]="orderForm">
+            <mat-form-field appearance="outline">
+              <mat-label>Selecione o cliente</mat-label>
+
+              <mat-select formControlName="customerId">
+                @for (customer of customers(); track customer.id) {
+                  <mat-option [value]="customer.id">
+                    {{ customer.name }} — {{ customer.email }}
+                  </mat-option>
+                }
+              </mat-select>
+
+              @if (orderForm.controls.customerId.hasError('required')) {
+                <mat-error>Selecione um cliente.</mat-error>
+              }
+            </mat-form-field>
+          </form>
+        </mat-card>
+
+        <mat-card class="card">
+          <h2>Adicionar produto</h2>
+
+          <form
+            class="item-form"
+            [formGroup]="itemForm"
+            (ngSubmit)="addItem()"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>Produto</mat-label>
+
+              <mat-select formControlName="productId">
+                @for (product of products(); track product.id) {
+                  <mat-option
+                    [value]="product.id"
+                    [disabled]="product.currentStock === 0"
+                  >
+                    {{ product.name }}
+                    — R$ {{ product.price | number:'1.2-2' }}
+                    — Estoque: {{ product.currentStock }}
+                  </mat-option>
+                }
+              </mat-select>
+
+              @if (itemForm.controls.productId.hasError('required')) {
+                <mat-error>Selecione um produto.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Quantidade</mat-label>
+
+              <input
+                matInput
+                type="number"
+                min="1"
+                step="1"
+                formControlName="quantity"
+              />
+
+              @if (itemForm.controls.quantity.hasError('min')) {
+                <mat-error>A quantidade deve ser maior que zero.</mat-error>
+              }
+            </mat-form-field>
+
+            <button mat-flat-button type="submit">
+              <mat-icon>add</mat-icon>
+              Adicionar
+            </button>
+          </form>
+        </mat-card>
+
+        <mat-card class="card">
+          <h2>Itens do pedido</h2>
+
+          @if (items().length === 0) {
+            <div class="empty-state">
+              <mat-icon>shopping_cart</mat-icon>
+              <p>Nenhum produto adicionado.</p>
+            </div>
+          } @else {
+            <div class="items-list">
+              @for (item of items(); track item.productId) {
+                <div class="item-row">
+                  <div class="item-description">
+                    <strong>{{ item.productName }}</strong>
+
+                    <span>
+                      {{ item.quantity }} ×
+                      R$ {{ item.unitPrice | number:'1.2-2' }}
+                    </span>
+                  </div>
+
+                  <div class="item-actions">
+                    <strong>
+                      R$
+                      {{
+                        item.quantity * item.unitPrice
+                          | number:'1.2-2'
+                      }}
+                    </strong>
+
+                    <button
+                      mat-icon-button
+                      type="button"
+                      title="Remover produto"
+                      aria-label="Remover produto"
+                      (click)="removeItem(item.productId)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card>
+      </div>
+
+      <aside>
+        <mat-card class="summary-card">
+          <h2>Resumo</h2>
+
+          <div class="summary-row">
+            <span>Produtos diferentes</span>
+            <strong>{{ items().length }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Total de unidades</span>
+            <strong>{{ totalUnits() }}</strong>
+          </div>
+
+          <div class="total-row">
+            <span>Valor total</span>
+            <strong>
+              R$ {{ totalAmount() | number:'1.2-2' }}
+            </strong>
+          </div>
+
+          <button
+            mat-flat-button
+            type="button"
+            class="finish-button"
+            [disabled]="isSaving() || items().length === 0"
+            (click)="submit()"
+          >
+            <mat-icon>check_circle</mat-icon>
+            {{ isSaving() ? 'Finalizando...' : 'Finalizar pedido' }}
+          </button>
+        </mat-card>
+      </aside>
+    </div>
+  }
+</section>
