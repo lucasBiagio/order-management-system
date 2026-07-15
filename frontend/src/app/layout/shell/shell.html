@@ -1,17 +1,11 @@
 <div class="layout">
+  <app-toolbar />
 
-    <app-toolbar />
+  <div class="content">
+    <app-sidebar />
 
-    <div class="content">
-
-        <app-sidebar />
-
-        <main>
-
-            <router-outlet />
-
-        </main>
-
-    </div>
-
+    <main class="page-content">
+      <router-outlet />
+    </main>
+  </div>
 </div>

@@ -2,8 +2,73 @@
   display: block;
 }
 
-mat-toolbar {
-  background: #1976d2;
-  color: white;
+.toolbar {
+  min-height: 76px;
+  padding: 0 24px;
+  background: #1565c0;
+  color: #ffffff;
+  box-shadow: 0 2px 16px rgb(0 0 0 / 12%);
+  position: relative;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 16%);
+
+  mat-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 26px;
+  }
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.title {
+  font-size: 18px;
   font-weight: 600;
+}
+
+.subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .toolbar {
+    padding: 0 16px;
+  }
+
+  .subtitle,
+  .profile span {
+    display: none;
+  }
 }
