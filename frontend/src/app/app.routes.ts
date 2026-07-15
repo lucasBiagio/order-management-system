@@ -1,10 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { DashboardPage } from './features/dashboard/pages/dashboard-page/dashboard-page';
-import { CustomerList } from './features/customers/pages/customer-list/customer-list';
-import { ProductList } from './features/products/pages/product-list/product-list';
-import { OrderList } from './features/orders/pages/order-list/order-list';
-import { OrderCreate } from './features/orders/pages/order-create/order-create';
 import { ShellComponent } from './layout/shell/shell';
 
 export const routes: Routes = [
@@ -19,23 +14,38 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        component: DashboardPage
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-page/dashboard-page'
+          ).then((component) => component.DashboardPage)
       },
       {
         path: 'customers',
-        component: CustomerList
+        loadComponent: () =>
+          import(
+            './features/customers/pages/customer-list/customer-list'
+          ).then((component) => component.CustomerList)
       },
       {
         path: 'products',
-        component: ProductList
+        loadComponent: () =>
+          import(
+            './features/products/pages/product-list/product-list'
+          ).then((component) => component.ProductList)
       },
       {
         path: 'orders',
-        component: OrderList
+        loadComponent: () =>
+          import(
+            './features/orders/pages/order-list/order-list'
+          ).then((component) => component.OrderList)
       },
       {
         path: 'orders/create',
-        component: OrderCreate
+        loadComponent: () =>
+          import(
+            './features/orders/pages/order-create/order-create'
+          ).then((component) => component.OrderCreate)
       }
     ]
   },

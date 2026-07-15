@@ -1,21 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { Product } from '../../../../core/models/product';
 import { ProductService } from '../../../../core/services/product.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 export interface ProductFormData {
   product?: Product;
@@ -29,20 +22,18 @@ export interface ProductFormData {
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
   ],
   templateUrl: './product-form.html',
-  styleUrl: './product-form.scss'
+  styleUrl: './product-form.scss',
 })
 export class ProductForm {
   private readonly formBuilder = inject(FormBuilder);
   private readonly productService = inject(ProductService);
+  private readonly notificationService = inject(NotificationService);
   private readonly dialogRef = inject(MatDialogRef<ProductForm>);
 
-  readonly data = inject<ProductFormData | null>(
-    MAT_DIALOG_DATA,
-    { optional: true }
-  );
+  readonly data = inject<ProductFormData | null>(MAT_DIALOG_DATA, { optional: true });
 
   readonly isSaving = signal(false);
   readonly isEditing = Boolean(this.data?.product);
@@ -50,26 +41,10 @@ export class ProductForm {
   readonly form = this.formBuilder.nonNullable.group({
     name: [
       this.data?.product?.name ?? '',
-      [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(120)
-      ]
+      [Validators.required, Validators.minLength(2), Validators.maxLength(120)],
     ],
-    price: [
-      this.data?.product?.price ?? 0,
-      [
-        Validators.required,
-        Validators.min(0.01)
-      ]
-    ],
-    currentStock: [
-      this.data?.product?.currentStock ?? 0,
-      [
-        Validators.required,
-        Validators.min(0)
-      ]
-    ]
+    price: [this.data?.product?.price ?? 0, [Validators.required, Validators.min(0.01)]],
+    currentStock: [this.data?.product?.currentStock ?? 0, [Validators.required, Validators.min(0)]],
   });
 
   submit(): void {
@@ -86,11 +61,10 @@ export class ProductForm {
     if (product) {
       this.productService.update(product.id, request).subscribe({
         next: () => {
+          this.notificationService.success('Produto atualizado com sucesso.');
+
           this.dialogRef.close(true);
         },
-        error: () => {
-          this.isSaving.set(false);
-        }
       });
 
       return;
@@ -98,11 +72,12 @@ export class ProductForm {
 
     this.productService.create(request).subscribe({
       next: () => {
+        this.notificationService.success('Produto criado com sucesso.');
         this.dialogRef.close(true);
       },
-      error: () => {
+      error: () => {  
         this.isSaving.set(false);
-      }
+      },
     });
   }
 

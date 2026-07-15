@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/conf
 import { Product } from '../../../../core/models/product';
 import { ProductService } from '../../../../core/services/product.service';
 import { ProductForm } from '../../components/product-form/product-form';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-product-list',
@@ -28,7 +29,7 @@ import { ProductForm } from '../../components/product-form/product-form';
 export class ProductList implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly dialog = inject(MatDialog);
-
+  private readonly notificationService = inject(NotificationService);
   readonly products = signal<Product[]>([]);
   readonly isLoading = signal(true);
 
@@ -83,27 +84,31 @@ export class ProductList implements OnInit {
   }
 
   deleteProduct(product: Product): void {
-  const dialogRef = this.dialog.open(ConfirmDialog, {
-    width: '460px',
-    maxWidth: '95vw',
-    data: {
-      title: 'Excluir produto',
-      message: `Deseja realmente excluir o produto "${product.name}"?`,
-      confirmText: 'Excluir',
-      cancelText: 'Cancelar'
-    }
-  });
-
-  dialogRef.afterClosed().subscribe((confirmed) => {
-    if (!confirmed) {
-      return;
-    }
-
-    this.productService.delete(product.id).subscribe({
-      next: () => {
-        this.loadProducts();
-      }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '460px',
+      maxWidth: '95vw',
+      data: {
+        title: 'Excluir produto',
+        message: `Deseja realmente excluir o produto "${product.name}"?`,
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+      },
     });
-  });
-}
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.productService.delete(product.id).subscribe({
+        next: () => {
+          this.notificationService.success(
+            'Produto removido com sucesso.'
+          );
+
+          this.loadProducts();
+        }
+      });
+    });
+  }
 }

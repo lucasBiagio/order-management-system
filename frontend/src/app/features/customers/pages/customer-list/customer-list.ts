@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { NotificationService } from '../../../../core/services/notification.service';
 import { Customer } from '../../../../core/models/customer';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
@@ -29,7 +29,7 @@ import { CustomerForm } from '../../components/customer-form/customer-form';
 export class CustomerList implements OnInit {
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
-
+private readonly notificationService = inject(NotificationService);
   readonly customers = signal<Customer[]>([]);
   readonly isLoading = signal(true);
 
@@ -100,11 +100,11 @@ export class CustomerList implements OnInit {
         return;
       }
 
-      this.customerService.delete(customer.id).subscribe({
-        next: () => {
-          this.loadCustomers();
-        }
-      });
+      this.notificationService.success(
+        'Cliente removido com sucesso.'
+      );
+
+      this.loadCustomers();
     });
   }
 }

@@ -31,3 +31,26 @@ app-root {
   --mat-snack-bar-supporting-text-color: #ffffff;
   --mat-snack-bar-button-color: #ffffff;
 }
+
+.success-snackbar {
+  --mat-snack-bar-container-color: #237a46;
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.error-snackbar {
+  --mat-snack-bar-container-color: #b42318;
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.success-snackbar .mat-mdc-snack-bar-label,
+.error-snackbar .mat-mdc-snack-bar-label {
+  color: #ffffff !important;
+}
+
+.success-snackbar .mat-mdc-button,
+.error-snackbar .mat-mdc-button {
+  color: #ffffff !important;
+  font-weight: 600;
+}

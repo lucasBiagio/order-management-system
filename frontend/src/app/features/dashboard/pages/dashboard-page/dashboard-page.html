@@ -1,1 +1,187 @@
-<p>dashboard-page works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">VISÃO GERAL</span>
+      <h1>Dashboard</h1>
+      <p>Acompanhe os principais indicadores do sistema.</p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <mat-card class="loading-card">
+      <mat-spinner diameter="42"></mat-spinner>
+      <span>Carregando indicadores...</span>
+    </mat-card>
+  } @else {
+    <div class="metrics-grid">
+      <mat-card class="metric-card">
+        <div class="metric-icon customers-icon">
+          <mat-icon>group</mat-icon>
+        </div>
+
+        <div class="metric-content">
+          <span>Clientes</span>
+          <strong>{{ customerCount() }}</strong>
+          <small>Total de clientes cadastrados</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-icon products-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+
+        <div class="metric-content">
+          <span>Produtos</span>
+          <strong>{{ productCount() }}</strong>
+          <small>Produtos disponíveis no catálogo</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-icon orders-icon">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+
+        <div class="metric-content">
+          <span>Pedidos</span>
+          <strong>{{ orderCount() }}</strong>
+          <small>Total de pedidos registrados</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-icon revenue-icon">
+          <mat-icon>payments</mat-icon>
+        </div>
+
+        <div class="metric-content">
+          <span>Valor total</span>
+          <strong>
+            R$ {{ totalRevenue() | number:'1.2-2' }}
+          </strong>
+          <small>Soma de todos os pedidos</small>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="dashboard-grid">
+      <mat-card class="status-card">
+        <div class="card-header">
+          <div>
+            <h2>Pedidos por status</h2>
+            <p>Distribuição atual dos pedidos.</p>
+          </div>
+
+          <mat-icon>donut_large</mat-icon>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-label">
+              <span class="status-dot pending-dot"></span>
+              <span>Pendentes</span>
+            </div>
+
+            <strong>{{ pendingOrders() }}</strong>
+          </div>
+
+          <div class="status-bar">
+            <div
+              class="status-progress pending-progress"
+              [style.width.%]="
+                orderCount() === 0
+                  ? 0
+                  : (pendingOrders() / orderCount()) * 100
+              "
+            ></div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-label">
+              <span class="status-dot paid-dot"></span>
+              <span>Pagos</span>
+            </div>
+
+            <strong>{{ paidOrders() }}</strong>
+          </div>
+
+          <div class="status-bar">
+            <div
+              class="status-progress paid-progress"
+              [style.width.%]="
+                orderCount() === 0
+                  ? 0
+                  : (paidOrders() / orderCount()) * 100
+              "
+            ></div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-label">
+              <span class="status-dot cancelled-dot"></span>
+              <span>Cancelados</span>
+            </div>
+
+            <strong>{{ cancelledOrders() }}</strong>
+          </div>
+
+          <div class="status-bar">
+            <div
+              class="status-progress cancelled-progress"
+              [style.width.%]="
+                orderCount() === 0
+                  ? 0
+                  : (cancelledOrders() / orderCount()) * 100
+              "
+            ></div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="latest-orders-card">
+        <div class="card-header">
+          <div>
+            <h2>Últimos pedidos</h2>
+            <p>Os cinco pedidos mais recentes.</p>
+          </div>
+
+          <mat-icon>history</mat-icon>
+        </div>
+
+        @if (latestOrders().length === 0) {
+          <div class="empty-state">
+            <mat-icon>receipt_long</mat-icon>
+            <p>Nenhum pedido registrado.</p>
+          </div>
+        } @else {
+          <div class="latest-orders-list">
+            @for (order of latestOrders(); track order.id) {
+              <div class="latest-order-item">
+                <div class="order-main">
+                  <div class="order-icon">
+                    <mat-icon>receipt_long</mat-icon>
+                  </div>
+
+                  <div>
+                    <strong>
+                      Pedido #{{ order.id.slice(0, 8) }}
+                    </strong>
+
+                    <span>
+                      {{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="order-total">
+                  R$ {{ order.totalAmount | number:'1.2-2' }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+    </div>
+  }
+</section>

@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Customer } from '../../../../core/models/customer';
 import { Order, OrderStatus } from '../../../../core/models/order';
 import { CustomerService } from '../../../../core/services/customer.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { OrderService } from '../../../../core/services/order.service';
 
 interface OrderListItem extends Order {
@@ -38,21 +39,13 @@ interface OrderListItem extends Order {
 export class OrderList implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly customerService = inject(CustomerService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly orders = signal<OrderListItem[]>([]);
   readonly isLoading = signal(true);
-
   readonly selectedStatus = signal<OrderStatus | null>(null);
-
-  readonly filteredOrders = computed(() => {
-    const status = this.selectedStatus();
-
-    if (status === null) {
-      return this.orders();
-    }
-
-    return this.orders().filter((order) => order.status === status);
-  });
+  readonly paidStatus = OrderStatus.Paid;
+  readonly cancelledStatus = OrderStatus.Cancelled;
 
   readonly statusOptions = [
     {
@@ -68,6 +61,16 @@ export class OrderList implements OnInit {
       label: 'Cancelado',
     },
   ];
+
+  readonly filteredOrders = computed(() => {
+    const status = this.selectedStatus();
+
+    if (status === null) {
+      return this.orders();
+    }
+
+    return this.orders().filter((order) => order.status === status);
+  });
 
   ngOnInit(): void {
     this.loadOrders();
@@ -104,6 +107,10 @@ export class OrderList implements OnInit {
     });
   }
 
+  filterByStatus(status: OrderStatus | null): void {
+    this.selectedStatus.set(status);
+  }
+
   updateStatus(order: OrderListItem, status: OrderStatus): void {
     if (order.status === status || order.isUpdatingStatus) {
       return;
@@ -124,11 +131,29 @@ export class OrderList implements OnInit {
               : currentOrder,
           ),
         );
+
+        this.notificationService.success('Status do pedido atualizado com sucesso.');
       },
       error: () => {
         this.setUpdatingStatus(order.id, false);
       },
     });
+  }
+
+  getAvailableStatuses(status: OrderStatus): OrderStatus[] {
+    switch (status) {
+      case OrderStatus.Pending:
+        return [OrderStatus.Pending, OrderStatus.Paid, OrderStatus.Cancelled];
+
+      case OrderStatus.Paid:
+        return [OrderStatus.Paid];
+
+      case OrderStatus.Cancelled:
+        return [OrderStatus.Cancelled];
+
+      default:
+        return [status];
+    }
   }
 
   getStatusLabel(status: OrderStatus): string {
@@ -178,9 +203,5 @@ export class OrderList implements OnInit {
 
   private buildCustomerNames(customers: Customer[]): Map<string, string> {
     return new Map(customers.map((customer) => [customer.id, customer.name]));
-  }
-
-  filterByStatus(status: OrderStatus | null): void {
-    this.selectedStatus.set(status);
   }
 }

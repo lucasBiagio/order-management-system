@@ -83,18 +83,23 @@
                   {{ order.totalItems === 1 ? 'unidade' : 'unidades' }}
                 </td>
 
+                <td></td>
                 <td>
                   <mat-select
                     class="status-select"
                     [value]="order.status"
-                    [disabled]="order.isUpdatingStatus"
+                    [disabled]="
+                      order.isUpdatingStatus ||
+                      order.status === paidStatus ||
+                      order.status === cancelledStatus
+                    "
                     (selectionChange)="updateStatus(order, $event.value)"
                     [class]="getStatusClass(order.status)"
                     aria-label="Alterar status do pedido"
                   >
-                    @for (option of statusOptions; track option.value) {
-                      <mat-option [value]="option.value">
-                        {{ option.label }}
+                    @for (status of getAvailableStatuses(order.status); track status) {
+                      <mat-option [value]="status">
+                        {{ getStatusLabel(status) }}
                       </mat-option>
                     }
                   </mat-select>

@@ -1,16 +1,6 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
@@ -22,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
+import { NotificationService } from '../../../../core/services/notification.service';
 import { Customer } from '../../../../core/models/customer';
 import { CreateOrderRequest } from '../../../../core/models/order';
 import { Product } from '../../../../core/models/product';
@@ -50,19 +40,19 @@ interface SelectedOrderItem {
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   templateUrl: './order-create.html',
-  styleUrl: './order-create.scss'
+  styleUrl: './order-create.scss',
 })
 export class OrderCreate implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly customerService = inject(CustomerService);
   private readonly productService = inject(ProductService);
   private readonly orderService = inject(OrderService);
-  private readonly snackBar = inject(MatSnackBar);
-  private readonly router = inject(Router);
 
+  private readonly router = inject(Router);
+  private readonly notificationService = inject(NotificationService);
   readonly customers = signal<Customer[]>([]);
   readonly products = signal<Product[]>([]);
   readonly items = signal<SelectedOrderItem[]>([]);
@@ -71,32 +61,20 @@ export class OrderCreate implements OnInit {
   readonly isSaving = signal(false);
 
   readonly totalAmount = computed(() =>
-    this.items().reduce(
-      (total, item) => total + item.quantity * item.unitPrice,
-      0
-    )
+    this.items().reduce((total, item) => total + item.quantity * item.unitPrice, 0),
   );
 
   readonly totalUnits = computed(() =>
-    this.items().reduce(
-      (total, item) => total + item.quantity,
-      0
-    )
+    this.items().reduce((total, item) => total + item.quantity, 0),
   );
 
   readonly orderForm = this.formBuilder.nonNullable.group({
-    customerId: ['', Validators.required]
+    customerId: ['', Validators.required],
   });
 
   readonly itemForm = this.formBuilder.nonNullable.group({
     productId: ['', Validators.required],
-    quantity: [
-      1,
-      [
-        Validators.required,
-        Validators.min(1)
-      ]
-    ]
+    quantity: [1, [Validators.required, Validators.min(1)]],
   });
 
   ngOnInit(): void {
@@ -108,7 +86,7 @@ export class OrderCreate implements OnInit {
 
     forkJoin({
       customers: this.customerService.getAll(),
-      products: this.productService.getAll()
+      products: this.productService.getAll(),
     }).subscribe({
       next: ({ customers, products }) => {
         this.customers.set(customers);
@@ -117,7 +95,7 @@ export class OrderCreate implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -129,26 +107,19 @@ export class OrderCreate implements OnInit {
 
     const { productId, quantity } = this.itemForm.getRawValue();
 
-    const product = this.products().find(
-      (item) => item.id === productId
-    );
+    const product = this.products().find((item) => item.id === productId);
 
     if (!product) {
       this.showError('Selecione um produto válido.');
       return;
     }
 
-    const existingItem = this.items().find(
-      (item) => item.productId === productId
-    );
+    const existingItem = this.items().find((item) => item.productId === productId);
 
-    const newQuantity =
-      (existingItem?.quantity ?? 0) + quantity;
+    const newQuantity = (existingItem?.quantity ?? 0) + quantity;
 
     if (newQuantity > product.currentStock) {
-      this.showError(
-        `Estoque insuficiente. Disponível: ${product.currentStock} unidade(s).`
-      );
+      this.showError(`Estoque insuficiente. Disponível: ${product.currentStock} unidade(s).`);
       return;
     }
 
@@ -158,10 +129,10 @@ export class OrderCreate implements OnInit {
           item.productId === productId
             ? {
                 ...item,
-                quantity: newQuantity
+                quantity: newQuantity,
               }
-            : item
-        )
+            : item,
+        ),
       );
     } else {
       this.items.update((items) => [
@@ -171,21 +142,19 @@ export class OrderCreate implements OnInit {
           productName: product.name,
           quantity,
           unitPrice: product.price,
-          availableStock: product.currentStock
-        }
+          availableStock: product.currentStock,
+        },
       ]);
     }
 
     this.itemForm.reset({
       productId: '',
-      quantity: 1
+      quantity: 1,
     });
   }
 
   removeItem(productId: string): void {
-    this.items.update((items) =>
-      items.filter((item) => item.productId !== productId)
-    );
+    this.items.update((items) => items.filter((item) => item.productId !== productId));
   }
 
   submit(): void {
@@ -209,27 +178,19 @@ export class OrderCreate implements OnInit {
       customerId: this.orderForm.controls.customerId.value,
       items: this.items().map((item) => ({
         productId: item.productId,
-        quantity: item.quantity
-      }))
+        quantity: item.quantity,
+      })),
     };
 
     this.orderService.create(request).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Pedido criado com sucesso.',
-          'Fechar',
-          {
-            duration: 4000,
-            horizontalPosition: 'right',
-            verticalPosition: 'top'
-          }
-        );
+        this.notificationService.success('Pedido criado com sucesso.');
 
         void this.router.navigate(['/orders']);
       },
       error: () => {
         this.isSaving.set(false);
-      }
+      },
     });
   }
 
@@ -238,11 +199,6 @@ export class OrderCreate implements OnInit {
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, 'Fechar', {
-      duration: 5000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top',
-      panelClass: ['error-snackbar']
-    });
+    this.notificationService.error(message);
   }
 }
