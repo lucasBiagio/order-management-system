@@ -2,8 +2,11 @@
   display: block;
   width: 260px;
   min-width: 260px;
-  background: #fafbfc;
+  background: #f8fafc;
   border-right: 1px solid #e4e8ee;
+  transition:
+    width 180ms ease,
+    min-width 180ms ease;
 }
 
 .sidebar {
@@ -63,28 +66,38 @@ a[mat-list-item] {
   padding: 14px 12px;
   border-top: 1px solid #edf0f3;
   color: #6b7280;
+  overflow: hidden;
 
   mat-icon {
-    flex-shrink: 0;
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-  }
-
-  strong {
-    color: #374151;
-    font-size: 12px;
-  }
-
-  span {
-    margin-top: 2px;
-    font-size: 10px;
+    flex: 0 0 auto;
   }
 }
 
-@media (max-width: 800px) {
+.footer-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.footer-text strong,
+.footer-text span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.footer-text strong {
+  color: #374151;
+  font-size: 12px;
+}
+
+.footer-text span {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+@media (max-width: 1200px) {
   :host {
     width: 76px;
     min-width: 76px;
@@ -96,7 +109,7 @@ a[mat-list-item] {
 
   .menu-label,
   [matListItemTitle],
-  .sidebar-footer div {
+  .footer-text {
     display: none;
   }
 
@@ -107,5 +120,17 @@ a[mat-list-item] {
 
   .sidebar-footer {
     justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  :host {
+    width: 64px;
+    min-width: 64px;
+  }
+
+  .sidebar {
+    padding-inline: 6px;
   }
 }

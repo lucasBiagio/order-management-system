@@ -1,1 +1,91 @@
-<p>product-list works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CATÁLOGO</span>
+      <h1>Produtos</h1>
+      <p>Consulte e gerencie os produtos disponíveis para pedidos.</p>
+    </div>
+
+    <button mat-flat-button type="button">
+      <mat-icon>add</mat-icon>
+      Novo produto
+    </button>
+  </header>
+
+  <mat-card class="table-card">
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="42"></mat-spinner>
+        <span>Carregando produtos...</span>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <h2>Nenhum produto encontrado</h2>
+        <p>Cadastre o primeiro produto para começar.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Preço</th>
+              <th>Estoque</th>
+              <th class="actions-column">Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (product of products(); track product.id) {
+              <tr>
+                <td>
+                  <div class="product-name">
+                    <div class="product-icon">
+                      <mat-icon>inventory_2</mat-icon>
+                    </div>
+
+                    <span>{{ product.name }}</span>
+                  </div>
+                </td>
+
+                <td class="price">
+                  R$ {{ product.price | number:'1.2-2' }}
+                </td>
+
+                <td>
+                  <span
+                    class="stock-badge"
+                    [class.low-stock]="product.currentStock <= 5"
+                  >
+                    {{ product.currentStock }} unidades
+                  </span>
+                </td>
+
+                <td class="actions-column">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Editar produto"
+                    title="Editar produto"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Excluir produto"
+                    title="Excluir produto"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </mat-card>
+</section>
