@@ -194,4 +194,186 @@ public sealed class CreateOrderTests
         Assert.NotNull(updatedProduct);
         Assert.Equal(2, updatedProduct.CurrentStock);
     }
+
+    [Fact]
+    public async Task CancelPendingOrder_ShouldRestoreProductStock()
+    {
+        // Arrange
+        var suffix = Guid.NewGuid().ToString("N");
+
+        var customerResponse = await _client.PostAsJsonAsync(
+            "/api/customers",
+            new CreateCustomerRequest
+            {
+                Name = $"Cliente Cancelamento {suffix}",
+                Email = $"cancelamento-{suffix}@email.com"
+            });
+
+        Assert.Equal(HttpStatusCode.Created, customerResponse.StatusCode);
+
+        var customer = await customerResponse.Content
+            .ReadFromJsonAsync<CustomerResponse>();
+
+        Assert.NotNull(customer);
+
+        var productResponse = await _client.PostAsJsonAsync(
+            "/api/products",
+            new CreateProductRequest
+            {
+                Name = $"Produto Cancelamento {suffix}",
+                Price = 100m,
+                CurrentStock = 5
+            });
+
+        Assert.Equal(HttpStatusCode.Created, productResponse.StatusCode);
+
+        var product = await productResponse.Content
+            .ReadFromJsonAsync<ProductResponse>();
+
+        Assert.NotNull(product);
+
+        var createOrderResponse = await _client.PostAsJsonAsync(
+            "/api/orders",
+            new CreateOrderRequest
+            {
+                CustomerId = customer.Id,
+                Items =
+                [
+                    new CreateOrderItemRequest
+                {
+                    ProductId = product.Id,
+                    Quantity = 3
+                }
+                ]
+            });
+
+        Assert.Equal(HttpStatusCode.Created, createOrderResponse.StatusCode);
+
+        var createdOrder = await createOrderResponse.Content
+            .ReadFromJsonAsync<OrderResponse>();
+
+        Assert.NotNull(createdOrder);
+        Assert.Equal(OrderStatus.Pending, createdOrder.Status);
+
+        var productAfterOrder = await _client.GetFromJsonAsync<ProductResponse>(
+            $"/api/products/{product.Id}");
+
+        Assert.NotNull(productAfterOrder);
+        Assert.Equal(2, productAfterOrder.CurrentStock);
+
+        // Act
+        var cancelResponse = await _client.PatchAsJsonAsync(
+            $"/api/orders/{createdOrder.Id}/status",
+            new UpdateOrderStatusRequest
+            {
+                Status = OrderStatus.Cancelled
+            });
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+
+        var cancelledOrder = await cancelResponse.Content
+            .ReadFromJsonAsync<OrderResponse>();
+
+        Assert.NotNull(cancelledOrder);
+        Assert.Equal(OrderStatus.Cancelled, cancelledOrder.Status);
+
+        var productAfterCancellation =
+            await _client.GetFromJsonAsync<ProductResponse>(
+                $"/api/products/{product.Id}");
+
+        Assert.NotNull(productAfterCancellation);
+        Assert.Equal(5, productAfterCancellation.CurrentStock);
+    }
+
+    [Fact]
+    public async Task CancelAlreadyCancelledOrder_ShouldNotRestoreStockTwice()
+    {
+        // Arrange
+        var suffix = Guid.NewGuid().ToString("N");
+
+        var customerResponse = await _client.PostAsJsonAsync(
+            "/api/customers",
+            new CreateCustomerRequest
+            {
+                Name = $"Cliente Duplo Cancelamento {suffix}",
+                Email = $"duplo-cancelamento-{suffix}@email.com"
+            });
+
+        Assert.Equal(HttpStatusCode.Created, customerResponse.StatusCode);
+
+        var customer = await customerResponse.Content
+            .ReadFromJsonAsync<CustomerResponse>();
+
+        Assert.NotNull(customer);
+
+        var productResponse = await _client.PostAsJsonAsync(
+            "/api/products",
+            new CreateProductRequest
+            {
+                Name = $"Produto Duplo Cancelamento {suffix}",
+                Price = 100m,
+                CurrentStock = 5
+            });
+
+        Assert.Equal(HttpStatusCode.Created, productResponse.StatusCode);
+
+        var product = await productResponse.Content
+            .ReadFromJsonAsync<ProductResponse>();
+
+        Assert.NotNull(product);
+
+        var createOrderResponse = await _client.PostAsJsonAsync(
+            "/api/orders",
+            new CreateOrderRequest
+            {
+                CustomerId = customer.Id,
+                Items =
+                [
+                    new CreateOrderItemRequest
+                {
+                    ProductId = product.Id,
+                    Quantity = 3
+                }
+                ]
+            });
+
+        Assert.Equal(HttpStatusCode.Created, createOrderResponse.StatusCode);
+
+        var createdOrder = await createOrderResponse.Content
+            .ReadFromJsonAsync<OrderResponse>();
+
+        Assert.NotNull(createdOrder);
+
+        var firstCancellationResponse = await _client.PatchAsJsonAsync(
+            $"/api/orders/{createdOrder.Id}/status",
+            new UpdateOrderStatusRequest
+            {
+                Status = OrderStatus.Cancelled
+            });
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            firstCancellationResponse.StatusCode);
+
+        // Act
+        var secondCancellationResponse = await _client.PatchAsJsonAsync(
+            $"/api/orders/{createdOrder.Id}/status",
+            new UpdateOrderStatusRequest
+            {
+                Status = OrderStatus.Cancelled
+            });
+
+        // Assert
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            secondCancellationResponse.StatusCode);
+
+        var productAfterSecondCancellation =
+            await _client.GetFromJsonAsync<ProductResponse>(
+                $"/api/products/{product.Id}");
+
+        Assert.NotNull(productAfterSecondCancellation);
+        Assert.Equal(5, productAfterSecondCancellation.CurrentStock);
+    }
 }

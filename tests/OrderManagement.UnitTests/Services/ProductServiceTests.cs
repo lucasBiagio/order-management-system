@@ -127,6 +127,24 @@ public sealed class ProductServiceTests
             () => _productService.GetByIdAsync(id));
     }
 
+    [Fact]
+    public void IncreaseStock_ShouldRestoreCancelledOrderQuantity()
+    {
+        // Arrange
+        var product = new Product(
+            name: "Monitor",
+            price: 899.90m,
+            currentStock: 5);
+
+        product.DecreaseStock(3);
+
+        // Act
+        product.IncreaseStock(3);
+
+        // Assert
+        Assert.Equal(5, product.CurrentStock);
+    }
+
     private void ConfigureSuccessfulValidation(
         CreateProductRequest request)
     {

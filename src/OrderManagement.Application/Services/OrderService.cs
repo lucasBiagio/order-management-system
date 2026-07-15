@@ -5,6 +5,7 @@ using OrderManagement.Application.DTOs.Orders;
 using OrderManagement.Application.Interfaces.Repositories;
 using OrderManagement.Application.Interfaces.Services;
 using OrderManagement.Domain.Entities;
+using OrderManagement.Domain.Enums;
 
 namespace OrderManagement.Application.Services;
 
@@ -178,6 +179,25 @@ public sealed class OrderService : IOrderService
         }
 
         order.ChangeStatus(request.Status);
+
+        if (request.Status == OrderStatus.Cancelled)
+        {
+            var productIds = order.Items
+                .Select(item => item.ProductId)
+                .ToArray();
+
+            var products = await _productRepository.GetByIdsAsync(
+                productIds,
+                cancellationToken);
+
+            var productsById = products.ToDictionary(product => product.Id);
+
+            foreach (var item in order.Items)
+            {
+                productsById[item.ProductId]
+                    .IncreaseStock(item.Quantity);
+            }
+        }
 
         await _orderRepository.SaveChangesAsync(cancellationToken);
 

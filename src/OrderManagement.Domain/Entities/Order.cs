@@ -56,20 +56,20 @@ public sealed class Order
 
     public void ChangeStatus(OrderStatus newStatus)
     {
-        if (Status == OrderStatus.Pending && newStatus == OrderStatus.Paid)
+        if (Status != OrderStatus.Pending)
         {
-            Status = newStatus;
-            return;
+            throw new DomainException(
+                "Somente pedidos pendentes podem ter o status alterado.");
         }
 
-        if (Status == OrderStatus.Paid && newStatus == OrderStatus.Cancelled)
+        if (newStatus != OrderStatus.Paid &&
+            newStatus != OrderStatus.Cancelled)
         {
-            Status = newStatus;
-            return;
+            throw new DomainException(
+                $"Não é permitido alterar o status para '{newStatus}'.");
         }
 
-        throw new DomainException(
-            $"Não é permitido alterar o status de '{Status}' para '{newStatus}'.");
+        Status = newStatus;
     }
 
     private void CalculateTotal()
