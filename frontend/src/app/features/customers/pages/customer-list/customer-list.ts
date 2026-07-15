@@ -84,27 +84,31 @@ private readonly notificationService = inject(NotificationService);
   }
 
   deleteCustomer(customer: Customer): void {
-    const dialogRef = this.dialog.open(ConfirmDialog, {
-      width: '460px',
-      maxWidth: '95vw',
-      data: {
-        title: 'Excluir cliente',
-        message: `Deseja realmente excluir o cliente "${customer.name}"?`,
-        confirmText: 'Excluir',
-        cancelText: 'Cancelar'
+  const dialogRef = this.dialog.open(ConfirmDialog, {
+    width: '460px',
+    maxWidth: '95vw',
+    data: {
+      title: 'Excluir cliente',
+      message: `Deseja realmente excluir o cliente "${customer.name}"?`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((confirmed) => {
+    if (!confirmed) {
+      return;
+    }
+
+    this.customerService.delete(customer.id).subscribe({
+      next: () => {
+        this.notificationService.success(
+          'Cliente removido com sucesso.'
+        );
+
+        this.loadCustomers();
       }
     });
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (!confirmed) {
-        return;
-      }
-
-      this.notificationService.success(
-        'Cliente removido com sucesso.'
-      );
-
-      this.loadCustomers();
-    });
-  }
+  });
+}
 }
