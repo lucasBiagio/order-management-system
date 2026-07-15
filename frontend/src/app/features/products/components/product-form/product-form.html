@@ -1,0 +1,82 @@
+<h2 mat-dialog-title>
+  {{ isEditing ? 'Editar produto' : 'Novo produto' }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="form-content">
+    <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ex.: Monitor 24 Polegadas"
+      />
+
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>O nome é obrigatório.</mat-error>
+      }
+
+      @if (form.controls.name.hasError('minlength')) {
+        <mat-error>Informe pelo menos 2 caracteres.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Preço</mat-label>
+      <span matTextPrefix>R$&nbsp;</span>
+      <input
+        matInput
+        type="number"
+        min="0.01"
+        step="0.01"
+        formControlName="price"
+      />
+
+      @if (form.controls.price.hasError('required')) {
+        <mat-error>O preço é obrigatório.</mat-error>
+      }
+
+      @if (form.controls.price.hasError('min')) {
+        <mat-error>O preço deve ser maior que zero.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Estoque atual</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0"
+        step="1"
+        formControlName="currentStock"
+      />
+
+      @if (form.controls.currentStock.hasError('required')) {
+        <mat-error>O estoque é obrigatório.</mat-error>
+      }
+
+      @if (form.controls.currentStock.hasError('min')) {
+        <mat-error>O estoque não pode ser negativo.</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      [disabled]="isSaving()"
+      (click)="cancel()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      mat-flat-button
+      type="submit"
+      [disabled]="isSaving()"
+    >
+      {{ isSaving() ? 'Salvando...' : 'Salvar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

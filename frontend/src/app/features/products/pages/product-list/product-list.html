@@ -6,7 +6,7 @@
       <p>Consulte e gerencie os produtos disponíveis para pedidos.</p>
     </div>
 
-    <button mat-flat-button type="button">
+    <button mat-flat-button type="button" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
       Novo produto
     </button>
@@ -49,15 +49,10 @@
                   </div>
                 </td>
 
-                <td class="price">
-                  R$ {{ product.price | number:'1.2-2' }}
-                </td>
+                <td class="price">R$ {{ product.price | number: '1.2-2' }}</td>
 
                 <td>
-                  <span
-                    class="stock-badge"
-                    [class.low-stock]="product.currentStock <= 5"
-                  >
+                  <span class="stock-badge" [class.low-stock]="product.currentStock <= 5">
                     {{ product.currentStock }} unidades
                   </span>
                 </td>
@@ -68,6 +63,7 @@
                     type="button"
                     aria-label="Editar produto"
                     title="Editar produto"
+                    (click)="openEditDialog(product)"
                   >
                     <mat-icon>edit</mat-icon>
                   </button>
@@ -77,6 +73,7 @@
                     type="button"
                     aria-label="Excluir produto"
                     title="Excluir produto"
+                    (click)="deleteProduct(product)"
                   >
                     <mat-icon>delete</mat-icon>
                   </button>
