@@ -86,6 +86,15 @@ SQLite Database
 
 The backend follows **Clean Architecture**, separating business rules from infrastructure concerns.
 
+### Backend Layers
+
+- **API**: Exposes REST endpoints and handles HTTP requests.
+- **Application**: Coordinates use cases, DTOs and business workflows.
+- **Domain**: Contains business entities and rules.
+- **Infrastructure**: Handles persistence, Entity Framework Core and external dependencies.
+
+This separation keeps the business rules independent from infrastructure concerns and improves maintainability and testability.
+
 ---
 
 # 🛠 Technologies
@@ -120,7 +129,7 @@ The backend follows **Clean Architecture**, separating business rules from infra
 
 ---
 
-# 🏗 Architecture
+# 📁 Project Structure
 
 ```text
 OrderManagement
@@ -139,14 +148,7 @@ OrderManagement
 │
 └── README.md
 ```
-### Backend Layers
 
-- **API**: Exposes REST endpoints and handles HTTP requests.
-- **Application**: Coordinates use cases, DTOs and business workflows.
-- **Domain**: Contains business entities and rules.
-- **Infrastructure**: Handles persistence, Entity Framework Core and external dependencies.
-
-This separation keeps the business rules independent from infrastructure concerns and improves maintainability and testability.
 ---
 
 # 🚀 Running with Docker
